@@ -4,16 +4,32 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
@@ -56,7 +72,10 @@ fun Nav(activity: MainActivity) {
     val currentDestination = navBackStackEntry?.destination
 
     Scaffold(topBar = {
-        if (currentDestination?.route !in disableTopBar) {
+        AnimatedVisibility(
+            visible = currentDestination?.route !in disableTopBar,
+            enter = slideInVertically { -it } + fadeIn(),
+            exit = slideOutVertically { -it } + fadeOut()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -76,18 +95,30 @@ fun Nav(activity: MainActivity) {
             }
         }
     }) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = Screen.Home.name,
-            modifier = Modifier.padding(innerPadding), enterTransition = {
-                EnterTransition.None
-            }, exitTransition = { ExitTransition.None }
-        ) {
-            composable(Screen.Home.name) {
-                HomeScreen(navController, data)
-            }
-            composable(Screen.Detail.name) {
-                DetailScreen(navController, data)
+        AnimatedContent(currentDestination?.route !in disableTopBar, transitionSpec = {
+            slideInVertically { -it } + fadeIn(animationSpec = tween(1000)) togetherWith slideOutVertically { it } + fadeOut(
+                tween(1000)
+            )
+        }) {
+            NavHost(
+                navController = navController,
+                startDestination = Screen.Home.name,
+                enterTransition = {
+                    EnterTransition.None
+                }, exitTransition = { ExitTransition.None },
+                modifier = Modifier
+                    .padding(
+                        if (it) innerPadding else PaddingValues(
+                            top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+                        )
+                    )
+            ) {
+                composable(Screen.Home.name) {
+                    HomeScreen(navController, data)
+                }
+                composable(Screen.Detail.name) {
+                    DetailScreen(navController, data)
+                }
             }
         }
     }

@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 
 @Composable
@@ -35,7 +36,7 @@ fun HomeScreen(navController: NavHostController, data: DataModel) {
                         .padding(10.dp)
                         .fillMaxWidth()
                 ) {
-                    Text(item.title)
+                    Text(item.title, fontWeight = FontWeight.Bold)
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier
@@ -46,7 +47,7 @@ fun HomeScreen(navController: NavHostController, data: DataModel) {
                             item.hall.forEach { text ->
                                 Text(
                                     text,
-                                    color = if (text == "1館") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                                    color = if (text == "1館") MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
                                 )
                                 Spacer(Modifier.padding(end = 5.dp))
                             }
